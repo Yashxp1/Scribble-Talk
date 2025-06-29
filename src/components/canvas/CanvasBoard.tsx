@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '../ui/button';
@@ -18,13 +18,25 @@ type Shape =
       y: number;
       radius: number;
       color?: string;
+    }
+  | {
+      type: 'line';
+      x1: number;
+      y1: number;
+      x2: number;
+      y2: number;
+      color?: string;
     };
 
 const CanvasBoard = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const [shapes, setShapes] = useState<Shape[]>([]);
-  const [mode, setMode] = useState<'rectangle' | 'circle'>('rectangle');
+  const [mode, setMode] = useState<'rectangle' | 'circle' | 'line'>(
+    'rectangle'
+  );
+
+  const [position, setPosition] = useState({x:window.innerWidth / 2, y: window.innerHeight / 2})
 
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPoint, setStartPoint] = useState<{
@@ -85,6 +97,15 @@ const CanvasBoard = () => {
             Math.pow(currentPoint.y - startPoint.y, 2)
         ),
       };
+    } else if (mode === 'line') {
+      newShape = {
+        type: 'line',
+        x1: startPoint.x,
+        y1: startPoint.y,
+        x2: currentPoint.x,
+        y2: currentPoint.y,
+        color: 'blue',
+      };
     }
 
     setShapes((prev) => [...prev, newShape]);
@@ -110,6 +131,11 @@ const CanvasBoard = () => {
         ctx.beginPath();
         ctx.arc(shape.x, shape.y, shape.radius, 0, Math.PI * 2);
         ctx.stroke();
+      } else if (shape.type === 'line') {
+        ctx.beginPath();
+        ctx.moveTo(shape.x1, shape.y1);
+        ctx.lineTo(shape.x2, shape.y2);
+        ctx.stroke();
       }
     });
 
@@ -128,6 +154,11 @@ const CanvasBoard = () => {
         ctx.beginPath();
         ctx.arc(startPoint.x, startPoint.y, radius, 0, Math.PI * 2);
         ctx.stroke();
+      } else if (mode === 'line') {
+        ctx.beginPath();
+        ctx.moveTo(startPoint.x, startPoint.y);
+        ctx.lineTo(currentPoint.x, currentPoint.y);
+        ctx.stroke();
       }
     }
   }, [isDrawing, startPoint, currentPoint]);
@@ -135,8 +166,10 @@ const CanvasBoard = () => {
   return (
     <div>
       <div className="border-2 flex gap-4">
-        <Button onClick={() => setMode('rectangle')}>Rectangle</Button>
+        <Button 
+         onClick={() => setMode('rectangle')}>Rectangle</Button>
         <Button onClick={() => setMode('circle')}>Circle</Button>
+        <Button onClick={() => setMode('line')}>line</Button>
       </div>
       <canvas
         ref={canvasRef}
