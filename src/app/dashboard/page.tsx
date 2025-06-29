@@ -1,8 +1,9 @@
+import CanvasBoard from '@/components/canvas/CanvasBoard'
 import React from 'react'
 
 const page = () => {
   return (
-    <div>dashboard page</div>
+    <div><CanvasBoard></CanvasBoard></div>
   )
 }
 
